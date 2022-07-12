@@ -21,11 +21,21 @@ services:
       GRAPHITE_LOG_ROTATION_COUNT: 1
       GRAPHITE_DEBUG: false
       GRAPHITE_DEFAULT_CACHE_DURATION: 60
+    labels:
+      traefik.backend.buffering.retryExpression: IsNetworkError() && Attempts() < 5
+      traefik.docker.network: "inverseproxy_shared"
+      traefik.frontend.passHostHeader: "true"
+      traefik.enable: "true"
+      traefik.domain: "trevi.et"
+      traefik.port: "80"
+      traefik.main-0.frontend.rule: Host:graphite.trevi.et
     networks:
       - default
       - monitoring_net
-    ports:
-      - 8000:80       # nginx
+      - inverseproxy_shared
+    restart: unless-stopped
+#    ports:
+#      - 8000:80       # nginx
 #      - 8125:8125/udp # statsd
 #      - 2003:2003     # carbon receiver plaintext
 #      - 8080:8080     # graphite (w/out nginx)
@@ -46,4 +56,6 @@ networks:
   monitoring_net:
     external: false
     name: monitoring_net
+  inverseproxy_shared:
+    external: true
 
