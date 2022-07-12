@@ -1,0 +1,49 @@
+version: '3.5'
+
+volumes:
+  carbon-data:
+    driver: local
+
+services:
+  graphite-statsd:
+    image: graphiteapp/graphite-statsd:1.1.10-3
+    container_name: graphite-statsd
+    environment:
+      # For a complete list see: https://hub.docker.com/r/graphiteapp/graphite-statsd
+      GRAPHITE_WSGI_PROCESSES: 4
+      GRAPHITE_WSGI_THREADS: 1
+      GRAPHITE_WSGI_REQUEST_TIMEOUT: 65
+      GRAPHITE_WSGI_MAX_REQUESTS: 1000
+      GRAPHITE_WSGI_REQUEST_LINE: 0
+      GRAPHITE_WSGI_WORKER_CLASS: "sync"
+      GRAPHITE_WSGI_WORKER_CONNECTIONS: 1000
+      GRAPHITE_TIME_ZONE: "UTC"
+      GRAPHITE_LOG_ROTATION_COUNT: 1
+      GRAPHITE_DEBUG: false
+      GRAPHITE_DEFAULT_CACHE_DURATION: 60
+    networks:
+      - default
+      - monitoring_net
+    ports:
+      - 8000:80       # nginx
+#      - 8125:8125/udp # statsd
+#      - 2003:2003     # carbon receiver plaintext
+#      - 8080:8080     # graphite (w/out nginx)
+#      - 8126:8126     # statsd admin
+#      - 2004:2004     # carbon receiver pickle
+#      - 2023:2023     # carbon aggregator plaintext
+
+#  statsd_exporter:
+#    image: prom/statsd_exporter
+#    command: "-statsd.mapping-config=/tmp/statsd_mapping.conf"
+#    ports:
+#      - "9102:9102"
+#      - "9125:9125/udp"
+#    volumes:
+#      - "./statsd_mapping.conf:/tmp/statsd_mapping.conf"
+
+networks:
+  monitoring_net:
+    external: false
+    name: monitoring_net
+
